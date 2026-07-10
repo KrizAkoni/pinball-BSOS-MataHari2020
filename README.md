@@ -1,3 +1,5 @@
+10JUL2026: Imported old BSOS files to make this stand alone. BSOS has migrated to RPU. The code will need to be ported to the newest libraries.
+
 ## Mata Hari 2020
 
 Note: This code has a dependency on BallySternOS - it won't build without those files. They're located in a repository here:
