@@ -1,0 +1,36 @@
+#elif (BALLY_STERN_OS_HARDWARE_REV==3)
+  // Set all pins to high-impedance inputs first
+  for (byte count=2; count<32; count++) pinMode(count, INPUT);
+
+  // =======================================================
+  // REVERSED PURE SOFTWARE DUAL-BOOT (REV 3)
+  // Hold Start Button at power-on → Arduino code
+  // Default (no button) → Freeze Arduino, boot native MPU
+  // =======================================================
+  
+  // Mata Hari Start Button: Strobe 0 (Pin 8), Return 6 (Pin 6)
+  pinMode(8, OUTPUT);
+  digitalWrite(8, LOW);           // Drive column low
+  pinMode(6, INPUT_PULLUP);       // Return line with pull-up
+  
+  delayMicroseconds(40);          // Settle time
+  
+  bool startButtonPressed = (digitalRead(6) == LOW);
+  
+  // Clean up pins
+  pinMode(8, INPUT);
+  pinMode(6, INPUT);
+
+  if (!startButtonPressed) {
+    // No button held → let native MPU boot
+    pinMode(14, OUTPUT);   // Halt pin
+    digitalWrite(14, HIGH);
+    while(1);              // Freeze Arduino
+  } 
+  
+  // Button WAS held → proceed with Arduino code
+  // Now halt the native 6800 so Arduino takes control
+  pinMode(14, OUTPUT);
+  digitalWrite(14, LOW);
+
+#endif
