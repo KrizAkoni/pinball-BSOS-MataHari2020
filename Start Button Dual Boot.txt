@@ -34,3 +34,60 @@
   digitalWrite(14, LOW);
 
 #endif
+
+/*
+void BSOS_InitializeMPU() {
+  // Wait for power supply and board to stabilize
+  delay(50);                    // 50ms - good balance for Rev 3
+
+#if (BALLY_STERN_OS_HARDWARE_REV==3)
+  
+  // =======================================================
+  // Rev 3 Software Dual-Boot: Hold Start Button at power-on
+  // to run Arduino code. Otherwise boot native MPU.
+  // =======================================================
+  
+  // Set all pins to high-impedance inputs first
+  for (byte count = 2; count < 32; count++) {
+    pinMode(count, INPUT);
+  }
+
+  // Mata Hari Start Button: Strobe 0 / Return 6
+  pinMode(8, OUTPUT);
+  digitalWrite(8, LOW);           // Drive strobe column low
+  pinMode(6, INPUT_PULLUP);       // Return line with pull-up
+
+  delayMicroseconds(40);          // Settle time
+
+  // Double-read for reliability (debounce)
+  delayMicroseconds(30);
+  bool startPressed = (digitalRead(6) == LOW);
+  
+  if (startPressed) {
+    delayMicroseconds(25);
+    if (digitalRead(6) != LOW) startPressed = false;
+  } else {
+    delayMicroseconds(30);
+    if (digitalRead(6) == LOW) startPressed = true;
+  }
+
+  // Clean up pins
+  pinMode(8, INPUT);
+  pinMode(6, INPUT);
+
+  if (!startPressed) {
+    // Start button NOT held → boot native Bally MPU
+    pinMode(14, OUTPUT);      // HALT line
+    digitalWrite(14, HIGH);   // Do not halt the 6800
+    while(1);                 // Freeze Arduino
+  } 
+  
+  // Start button WAS held → run Arduino firmware
+  pinMode(14, OUTPUT);
+  digitalWrite(14, LOW);      // Halt the native 6800
+
+#endif
+
+  // Continue with normal MPU initialization...
+}
+*/
