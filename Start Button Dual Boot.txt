@@ -1,58 +1,29 @@
+/* This gets inserted inside BallySternOS.cpp around line 1276 */
 #elif (BALLY_STERN_OS_HARDWARE_REV==3)
+  
   // Set all pins to high-impedance inputs first
-  for (byte count=2; count<32; count++) pinMode(count, INPUT);
-
+  for (byte count=2; count<32; count++) {pinMode(count, INPUT);}
+  
+  // Decide if halt should be raised (based on switch) 
+    pinMode(13, INPUT);
+  if (digitalRead(13)==0) {
+    // Switch indicates the Arduino should run, so HALT the 6800
+    pinMode(14, OUTPUT); // Halt
+    digitalWrite(14, LOW);
+  } else {
+    // Let the 6800 run 
+    pinMode(14, OUTPUT); // Halt
+    digitalWrite(14, HIGH);
+    while(1);
+  }  
+  
   // =======================================================
-  // REVERSED PURE SOFTWARE DUAL-BOOT (REV 3)
+  // Prototype SOFTWARE DUAL-BOOT (REV 3)
   // Hold Start Button at power-on → Arduino code
   // Default (no button) → Freeze Arduino, boot native MPU
   // =======================================================
   
   // Mata Hari Start Button: Strobe 0 (Pin 8), Return 6 (Pin 6)
-  pinMode(8, OUTPUT);
-  digitalWrite(8, LOW);           // Drive column low
-  pinMode(6, INPUT_PULLUP);       // Return line with pull-up
-  
-  delayMicroseconds(40);          // Settle time
-  
-  bool startButtonPressed = (digitalRead(6) == LOW);
-  
-  // Clean up pins
-  pinMode(8, INPUT);
-  pinMode(6, INPUT);
-
-  if (!startButtonPressed) {
-    // No button held → let native MPU boot
-    pinMode(14, OUTPUT);   // Halt pin
-    digitalWrite(14, HIGH);
-    while(1);              // Freeze Arduino
-  } 
-  
-  // Button WAS held → proceed with Arduino code
-  // Now halt the native 6800 so Arduino takes control
-  pinMode(14, OUTPUT);
-  digitalWrite(14, LOW);
-
-#endif
-
-/*
-void BSOS_InitializeMPU() {
-  // Wait for power supply and board to stabilize
-  delay(50);                    // 50ms - good balance for Rev 3
-
-#if (BALLY_STERN_OS_HARDWARE_REV==3)
-  
-  // =======================================================
-  // Rev 3 Software Dual-Boot: Hold Start Button at power-on
-  // to run Arduino code. Otherwise boot native MPU.
-  // =======================================================
-  
-  // Set all pins to high-impedance inputs first
-  for (byte count = 2; count < 32; count++) {
-    pinMode(count, INPUT);
-  }
-
-  // Mata Hari Start Button: Strobe 0 / Return 6
   pinMode(8, OUTPUT);
   digitalWrite(8, LOW);           // Drive strobe column low
   pinMode(6, INPUT_PULLUP);       // Return line with pull-up
@@ -61,15 +32,22 @@ void BSOS_InitializeMPU() {
 
   // Double-read for reliability (debounce)
   delayMicroseconds(30);
-  bool startPressed = (digitalRead(6) == LOW);
-  
+ 
+ 
+ /* bool startPressed = (digitalRead(6) == LOW);
   if (startPressed) {
     delayMicroseconds(25);
     if (digitalRead(6) != LOW) startPressed = false;
   } else {
     delayMicroseconds(30);
     if (digitalRead(6) == LOW) startPressed = true;
-  }
+  }*/
+
+  bool firstRead = (digitalRead(6) == LOW);
+  delayMicroseconds(25);
+  bool secondRead = (digitalRead(6) == LOW);
+  // Must be cleanly LOW on both reads to count as a genuine press
+  bool startPressed = (firstRead && secondRead);
 
   // Clean up pins
   pinMode(8, INPUT);
@@ -88,6 +66,5 @@ void BSOS_InitializeMPU() {
 
 #endif
 
-  // Continue with normal MPU initialization...
-}
-*/
+
+// Continue with normal MPU initialization...  
